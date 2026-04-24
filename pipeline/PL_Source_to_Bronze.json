@@ -1,0 +1,121 @@
+{
+	"name": "PL_Source_to_Bronze",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach_folder",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.p_folder_list",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy_Source_To_Bronze",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"wildcardFolderPath": {
+											"value": "@item()",
+											"type": "Expression"
+										},
+										"wildcardFileName": "*",
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings",
+										"copyBehavior": "MergeFiles"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_Source_CSV",
+									"type": "DatasetReference",
+									"parameters": {
+										"p_container": "@pipeline().parameters.p_source_container",
+										"p_directory": "@item()",
+										"p_file_name": "*"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_Bronze_CSV",
+									"type": "DatasetReference",
+									"parameters": {
+										"p_container": "@pipeline().parameters.p_bronze_container",
+										"p_directory": "@concat(pipeline().parameters.p_project_name,'/',item())",
+										"p_file_name": "@concat(item(),'.csv')"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_source_container": {
+				"type": "string",
+				"defaultValue": "sales-view-devtst"
+			},
+			"p_bronze_container": {
+				"type": "string",
+				"defaultValue": "bronze"
+			},
+			"p_project_name": {
+				"type": "string",
+				"defaultValue": "sales-view"
+			},
+			"p_folder_list": {
+				"type": "array",
+				"defaultValue": [
+					"customer",
+					"product",
+					"store",
+					"sales"
+				]
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-04-24T13:29:03Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

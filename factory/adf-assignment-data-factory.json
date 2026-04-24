@@ -1,0 +1,15 @@
+{
+	"name": "adf-assignment-data-factory",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Enabled",
+			"editable": true
+		}
+	},
+	"location": "southeastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "998cae26-97df-4aa4-83bb-adbe3a58c110",
+		"tenantId": "96797383-beaf-4d82-9862-0b3f6807f36a"
+	}
+}
