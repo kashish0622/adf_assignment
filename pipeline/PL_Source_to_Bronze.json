@@ -31,6 +31,14 @@
 									"storeSettings": {
 										"type": "AzureBlobFSReadSettings",
 										"recursive": true,
+										"modifiedDatetimeStart": {
+											"value": "@pipeline().parameters.p_start_time",
+											"type": "Expression"
+										},
+										"modifiedDatetimeEnd": {
+											"value": "@pipeline().parameters.p_end_time",
+											"type": "Expression"
+										},
 										"wildcardFolderPath": {
 											"value": "@item()",
 											"type": "Expression"
@@ -86,6 +94,56 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "Get Metadata1",
+							"type": "GetMetadata",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_Source_CSV",
+									"type": "DatasetReference",
+									"parameters": {
+										"p_container": "@pipeline().parameters.p_source_container",
+										"p_directory": "@item()",
+										"p_file_name": "*"
+									}
+								},
+								"fieldList": [
+									"childItems"
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "Filter1",
+							"type": "Filter",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"items": {
+									"value": "@activity('Get_Files').output.childItems",
+									"type": "Expression"
+								},
+								"condition": {
+									"value": "@equals(item().type,'File')",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -112,6 +170,14 @@
 					"store",
 					"sales"
 				]
+			},
+			"p_start_time": {
+				"type": "string",
+				"defaultValue": "2026-04-24T00:00:00Z"
+			},
+			"p_end_time": {
+				"type": "string",
+				"defaultValue": "2026-04-25T00:00:00Z"
 			}
 		},
 		"annotations": [],
